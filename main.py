@@ -1,7 +1,7 @@
 import cv2
 import math
 
-path = 'bending.jpg'
+path = 'Desktop/bending.jpg'
 img = cv2.imread(path)
 
 
