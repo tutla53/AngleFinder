@@ -1,13 +1,22 @@
 import cv2
 import math
 
-path = 'Angle/img.png'
-img = cv2.imread(path)
+source = 'source/chamber1/'
+name = 'GOPR0235_undistorted2'
+fileType = '.JPG'
+
+path = source+name+fileType
+px = 1400
+py = 1050
+# path = 'Angle/angle_2.jpg'
+imS = cv2.imread(path)
+img = cv2.resize(imS, (px, py))
 pointsList = []
 count = 0;
 
 def gradient(pts1, pts2):
-    return (pts2[1] - pts1[1]) / (pts2[0] - pts1[0])
+    gr = (pts2[1] - pts1[1]) / (pts2[0] - pts1[0])
+    return gr
 
 def getAngle(ptlist):
     p1, p2, p3 = ptlist[-3:]
@@ -21,8 +30,9 @@ def getAngle(ptlist):
 def mousepoints(event, x, y, flags, params):
     if event == cv2.EVENT_LBUTTONDOWN:
         if len(pointsList) == 0:
+            # Reference Axis
             pt1 = [x, y]
-            pt2 = [x+350, y]
+            pt2 = [x, y-600]
             cv2.circle(img, tuple(pt1), 3, (0, 0, 255),cv2.FILLED)
             cv2.circle(img, tuple(pt2), 3, (0, 0, 255),cv2.FILLED)
             cv2.line(img, tuple(pt1), tuple(pt2), (0,0,255), 2)
@@ -41,29 +51,44 @@ def mousepoints(event, x, y, flags, params):
             pt0 = pointsList[-4]
             cv2.circle(img, tuple(pt4), 3, (0, 0, 255), cv2.FILLED)
             cv2.line(img, tuple(pt), tuple(pt4), (0, 0, 255), 2)
+
+            # Create Center Point of The Soft Robot Tip (use pt and pt4)
             pt5 = [round((pt4[0]+pt[0])/2), round((pt4[1]+pt[1])/2)]
             cv2.circle(img, tuple(pt5), 3, (0, 0, 255), cv2.FILLED)
 
-            m = -1/gradient(pt, pt4)
             m1 = gradient(pt, pt4)
-            x6 = round(-((pt0[1] - pt5[1]) * m1) + pt5[0])
-            pt6 = [x6, pt0[1]]
+            m = -1/m1
+
+            # Create Intersection Point with Y-Axis (Center)
+            y6 = round(((pt0[0] - pt5[0]) * m) + pt5[1])
+            pt6 = [pt0[0], y6]
             cv2.circle(img, tuple(pt6), 3, (0, 0, 255), cv2.FILLED)
             cv2.line(img, tuple(pt5), tuple(pt6), (0, 0, 255), 2)
 
             pointsList.append(pt5)
             pointsList.append(pt6)
 
-            x1 = -(pt[0]-pt4[0])
-            x2 = pt[1]-pt4[1]
-            angR = math.atan2(-x1, -x2)
+            # Calculate the Angle
+            x1 = abs(pt[0]-pt4[0])
+            y1 = abs(pt[1]-pt4[1])
+            print(x1)
+            print(y1)
+            angR = math.atan(y1/x1)
             angD = math.degrees(angR)
-            if(pt4[1]>pt0[1]):
-               angD += 180
-            if(angD>180):
-                angD -=360
             print(angD)
-            cv2.putText(img,str(round(angD)), (pt6[0]+40, pt6[1]-40),
+            print(m1)
+            print(m)
+            if(pt[0]<pt0[0]):
+                if(m<0):
+                    angD = 180 - angD
+            elif(pt[0]>pt0[0]):
+                if(m>0):
+                    angD = 180 +angD
+                else:
+                    angD = 360 - angD
+            angD = angD % 360
+            print(angD)
+            cv2.putText(img, str(round(angD)), (pt5[0]+60, pt5[1]-30),
                         cv2.FONT_HERSHEY_COMPLEX, 1.5, (0,0,0), 2)
 
 while True:
@@ -71,4 +96,8 @@ while True:
     cv2.setMouseCallback('Image', mousepoints)
     if cv2.waitKey(1) & 0xFF == ord('a'):
         pointsList = []
-        img = cv2.imread(path)
+        imS = cv2.imread(path)
+        img = cv2.resize(imS, (px, py))
+    elif cv2.waitKey(1) & 0xFF == ord('s'):
+        status = cv2.imwrite('final/'+name+'_final'+fileType, img)
+        print("Image written to file-system : ", status)
