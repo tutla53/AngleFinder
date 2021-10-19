@@ -1,9 +1,9 @@
 import cv2
 import math
 
-source = 'source/Bending/ch2/Decrement/'
-result = 'result/Bending/ch2/Decrement/'
-name = 'P020'
+source = 'source/Vectoring/Intermittent/'
+result = 'result/Vectoring/Intermittent/'
+name = '13_ch3'
 fileType = '.JPG'
 
 path = source+name+fileType
@@ -33,10 +33,11 @@ def mousepoints(event, x, y, flags, params):
         if len(pointsList) == 0:
             # Reference Axis
             pt1 = [x, y]
-            pt2 = [x, y-750]
+            pt2 = [x + 750, y]
+            pt_plus = [x - 750, y]
             cv2.circle(img, tuple(pt1), 3, (0, 0, 255),cv2.FILLED)
             cv2.circle(img, tuple(pt2), 3, (0, 0, 255),cv2.FILLED)
-            cv2.line(img, tuple(pt1), tuple(pt2), (0,0,255), 2)
+            cv2.line(img, tuple(pt_plus), tuple(pt2), (0,0,255), 2)
             pointsList.append(pt1)
             pointsList.append(pt2)
 
@@ -60,9 +61,9 @@ def mousepoints(event, x, y, flags, params):
             m1 = gradient(pt, pt4)
             m = -1/m1
 
-            # Create Intersection Point with Y-Axis (Center)
-            y6 = round(((pt0[0] - pt5[0]) * m) + pt5[1])
-            pt6 = [pt0[0], y6]
+            # Create Intersection Point with X-Axis (Center)
+            x6 = round(((pt0[1] - pt5[1]) * m) + pt5[0])
+            pt6 = [pt0[0],pt0[1]]
             cv2.circle(img, tuple(pt6), 3, (0, 0, 255), cv2.FILLED)
             cv2.line(img, tuple(pt5), tuple(pt6), (0, 0, 255), 2)
 
@@ -87,9 +88,9 @@ def mousepoints(event, x, y, flags, params):
                     angD = 180 +angD
                 else:
                     angD = 360 - angD
-            angD = angD % 360
+            angD = (angD+90) % 360
             print(angD)
-            cv2.putText(img, str(round(angD)), (pt5[0]+60, pt5[1]-30),
+            cv2.putText(img, str(round(angD)), (pt5[0]+20, pt5[1]+20),
                         cv2.FONT_HERSHEY_COMPLEX, 1.5, (0,0,0), 2)
 
 while True:
@@ -100,5 +101,5 @@ while True:
         imS = cv2.imread(path)
         img = cv2.resize(imS, (px, py))
     elif cv2.waitKey(1) & 0xFF == ord('s'):
-        status = cv2.imwrite(result + name + '_final' +fileType, img)
+        status = cv2.imwrite(result + name + '_finalDec' +fileType, img)
         print("Image written to file-system : ", status)
