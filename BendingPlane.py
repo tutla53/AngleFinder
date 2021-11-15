@@ -1,9 +1,9 @@
 import cv2
 import math
 
-source = 'source/Vectoring/Intermittent/'
-result = 'result/Vectoring/Intermittent/'
-name = '13_ch3'
+source = 'source/Transient/'
+result = 'result/Transient/'
+name = 'frame_24'
 fileType = '.JPG'
 
 path = source+name+fileType
@@ -11,7 +11,8 @@ px = 1400
 py = 1050
 # path = 'Angle/angle_2.jpg'
 imS = cv2.imread(path)
-img = cv2.resize(imS, (px, py))
+img = imS
+# img = cv2.resize(imS, (px, py))
 pointsList = []
 count = 0;
 
@@ -35,6 +36,8 @@ def mousepoints(event, x, y, flags, params):
             pt1 = [x, y]
             pt2 = [x + 750, y]
             pt_plus = [x - 750, y]
+            print(x)
+            print(y)
             cv2.circle(img, tuple(pt1), 3, (0, 0, 255),cv2.FILLED)
             cv2.circle(img, tuple(pt2), 3, (0, 0, 255),cv2.FILLED)
             cv2.line(img, tuple(pt_plus), tuple(pt2), (0,0,255), 2)
@@ -99,7 +102,8 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('a'):
         pointsList = []
         imS = cv2.imread(path)
-        img = cv2.resize(imS, (px, py))
+        img = imS
+        #img = cv2.resize(imS, (px, py))
     elif cv2.waitKey(1) & 0xFF == ord('s'):
         status = cv2.imwrite(result + name + '_finalDec' +fileType, img)
         print("Image written to file-system : ", status)
